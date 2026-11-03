@@ -1,0 +1,79 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environment
+.env
+*.env.*
+venv/
+.venv/
+
+# PostgreSQL password file
+.pgpass
+
+# Logs
+logs/
+*.log
+
+# Outputs
+outputs/
+*.csv
+*.parquet
+
+# Machine Learning
+catboost_info/
+target/
+
+# Build
+build/
+dist/
+*.egg-info/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# OS/Editor
+.DS_Store
+Thumbs.db
+*.swp
+*.tmp
+
+# Databases
+*.db
+*.sqlite
+db_backup/*.sql
+*.dump
+*.sql
+
+# Keep config tracked
+!config.json
+
+*tiger*
+
+
+*supervised*
+dbt_project/target/
+
+# Claude/AI settings
+.claude/
+.claude/**
+*.claude.*
+
+# Streamlit secrets
+.streamlit/secrets.toml
+app/.streamlit/secrets.toml
+
+*.md
+
+# convex data exports
+scripts/**/convex_export/
+
+# convex data exports
+scripts/**/convex_export/
+
+# Keep source SQL + notebooks that the blanket *.sql / *supervised* rules would drop
+!dbt_project/**/*.sql
+!database/*.sql
+!docker/*.sql
+!src/*supervised*.ipynb

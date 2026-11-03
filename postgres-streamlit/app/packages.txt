@@ -1,0 +1,4 @@
+libpq-dev
+postgresql-client
+gdal-bin
+libgdal-dev

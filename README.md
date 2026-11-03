@@ -1,117 +1,68 @@
-# Enhanced ETL System for Census and Urban Institute Data
+# Milestone 2 — Education Outcomes Analytics
 
-This project provides a production-ready ETL system that extracts data from multiple APIs and loads it into a PostgreSQL database with comprehensive error handling and data validation.
-
-## Recent Improvements
-
-- Fixed JSON serialization errors with Timestamp objects
-- Resolved NaN handling in PostgreSQL JSONB operations
-- Fixed SQL parameter binding issues
-- Enhanced error handling and logging
-- Added fast offline geocoding for coordinate mapping
-
-## Key Features
-
-- Multi-API support for US Census Bureau and Urban Institute
-- Modular design with separate components for different data sources
-- Support for local PostgreSQL and AWS RDS
-- Automatic data cleaning and NaN handling
-- CSV backup generation
-- Fast offline geographic processing
-- Interactive Jupyter notebook tools
-
-## Project Structure
+Two independent stacks, one repo. Each folder is self-contained and deploys on its own.
 
 ```
-├── src/                             # Source code modules
-│   ├── main.py                      # Main ETL controller
-│   ├── census_data.py               # Census ETL component
-│   ├── urban_data.py                # Urban Institute ETL component
-│   ├── location_data.py             # Geographic data processing
-│   └── database_explorer.py         # Database utilities
-├── dbt_project/                     # dbt transformation project
-│   ├── models/                      # SQL transformation models
-│   │   ├── staging/                 # Data cleaning models
-│   │   └── marts/                   # Business logic models
-│   └── dbt_project.yml              # dbt configuration
-└── run_dbt.ps1                      # PowerShell script for dbt
+convex-vercel/        # Next.js 15 + Convex, deployed on Vercel  (current)
+postgres-streamlit/   # Postgres/PostGIS + Streamlit + dbt + Docker ETL  (legacy)
 ```
 
-## Data Sources
-
-### US Census Bureau API
-- American Community Survey (ACS) 5-year estimates
-- Demographics, household income, age distributions
-- ZIP code tabulation areas
-
-### Urban Institute Education Data API
-- Education statistics and school information
-- Endpoints: schools directory and enrollment data
-- No API key required
-
-### Geographic Data (TIGER/Line)
-- US Census Bureau shapefiles (2023)
-- Offline processing with GeoPandas
-- County, state, and ZIP code boundaries
-
-## Prerequisites
-
-- Python 3.8+
-- PostgreSQL 12+ with PostGIS
-- 8GB RAM minimum (16GB recommended)
-- 5GB free storage for shapefiles
-
-## Installation
-
-1. Clone the repository
-   ```bash
-   git clone <repository-url>
-   cd 696-Milestone-2
-   ```
-
-2. Install Python dependencies
-   ```bash
-   pip install -r requirements.txt
-   pip install -r dbt_project/requirements_dbt.txt
-   ```
-
-3. Configure the application
-   - Copy `.env.example` to `.env` with your credentials
-   - Edit `config.json` with database settings
-
-4. Install pre-commit hooks (optional)
-   ```bash
-   pip install pre-commit
-   pre-commit install
-   ```
-
-## Usage
-
-### ETL Execution
+## convex-vercel — run
 
 ```bash
-# Run main ETL controller
-python src/main.py
-
-# Run individual components
-python src/urban_data.py
-python src/census_data.py
-python src/location_data.py
+cd convex-vercel
+npm install
+npx convex dev        # terminal 1 — Convex backend, hot reload
+npm run dev           # terminal 2 — Next.js on http://localhost:3000
 ```
 
-### dbt Transformation
+Load data (pre-exported NDJSON in `scripts/convex_export/`):
 
 ```bash
-# PowerShell
-.\run_dbt.ps1
-
-# Bash/CMD
-dbt run --profiles-dir dbt_project
-dbt docs generate --profiles-dir dbt_project
+npx convex import --table districts    scripts/convex_export/districts.jsonl
+npx convex import --table county_stats scripts/convex_export/county_stats.jsonl
+npx convex import --table state_stats  scripts/convex_export/state_stats.jsonl
 ```
 
-## Resources
+## convex-vercel — deploy
 
-- Urban Institute API: https://educationdata.urban.org
-- US Census Bureau: https://www.census.gov/data/developers.html
-- PostgreSQL Documentation: https://www.postgresql.org/docs/
+```bash
+npx convex deploy                 # push Convex functions/schema to prod deployment
+vercel                            # preview deploy
+vercel --prod                     # production deploy
+vercel env add NEXT_PUBLIC_CONVEX_URL production
+vercel env pull .env.local        # sync cloud env vars to local
+```
+
+Vercel dashboard: set **Root Directory** to `convex-vercel`. Convex prod URL goes in `NEXT_PUBLIC_CONVEX_URL`.
+
+Other useful: `npx convex dashboard`, `npx convex logs`, `npx convex codegen`, `npx convex env list`, `vercel ls`, `vercel logs <url>`.
+
+## postgres-streamlit — run
+
+```bash
+cd postgres-streamlit
+cp .env.example .env              # fill in DB credentials
+docker-compose -f docker-compose.prod.yml up --build
+# Streamlit http://localhost:8501  |  Postgres localhost:5432
+```
+
+ETL / dbt (inside containers):
+
+```bash
+docker exec milestone2-etl python /app/src/main.py               # full pipeline
+docker exec milestone2-etl ./entrypoint.sh census|urban|location  # single source
+docker exec milestone2-etl ./entrypoint.sh dbt-run|dbt-test       # transforms
+docker exec -it milestone2-db psql -U postgres -d milestone2      # SQL shell
+```
+
+## postgres-streamlit — deploy
+
+- **Railway**: `railway.json` + `Procfile` at stack root; set service root to `postgres-streamlit`, attach Postgres plugin, set `DB_*` env vars. Guide: `docs/RAILWAY_DEPLOYMENT.md`.
+- **Streamlit Cloud**: main file `postgres-streamlit/app/Home.py`; secrets in dashboard. Guide: `docs/STREAMLIT_CLOUD_SETUP.md`.
+
+Full command reference: `postgres-streamlit/CLAUDE.md`.
+
+## Shared analytics assets
+
+`notebooks/`, `supervised/`, `unsupervised/`, `src/`, `db_backup/` are duplicated into both stacks so each stands alone.
