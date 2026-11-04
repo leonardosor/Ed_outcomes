@@ -1,117 +1,51 @@
-# Enhanced ETL System for Census and Urban Institute Data
+# Education Outcomes — Income & Math Proficiency
 
-This project provides a production-ready ETL system that extracts data from multiple APIs and loads it into a PostgreSQL database with comprehensive error handling and data validation.
+Next.js 15 + Convex app, deployed on Vercel. Explores how household income relates to
+grade-8 math proficiency across US schools (state → county → school drill-down, AI insights
+via Claude in Amazon Bedrock).
 
-## Recent Improvements
+All app code lives in `convex-vercel/`.
 
-- Fixed JSON serialization errors with Timestamp objects
-- Resolved NaN handling in PostgreSQL JSONB operations
-- Fixed SQL parameter binding issues
-- Enhanced error handling and logging
-- Added fast offline geocoding for coordinate mapping
-
-## Key Features
-
-- Multi-API support for US Census Bureau and Urban Institute
-- Modular design with separate components for different data sources
-- Support for local PostgreSQL and AWS RDS
-- Automatic data cleaning and NaN handling
-- CSV backup generation
-- Fast offline geographic processing
-- Interactive Jupyter notebook tools
-
-## Project Structure
-
-```
-├── src/                             # Source code modules
-│   ├── main.py                      # Main ETL controller
-│   ├── census_data.py               # Census ETL component
-│   ├── urban_data.py                # Urban Institute ETL component
-│   ├── location_data.py             # Geographic data processing
-│   └── database_explorer.py         # Database utilities
-├── dbt_project/                     # dbt transformation project
-│   ├── models/                      # SQL transformation models
-│   │   ├── staging/                 # Data cleaning models
-│   │   └── marts/                   # Business logic models
-│   └── dbt_project.yml              # dbt configuration
-└── run_dbt.ps1                      # PowerShell script for dbt
-```
-
-## Data Sources
-
-### US Census Bureau API
-- American Community Survey (ACS) 5-year estimates
-- Demographics, household income, age distributions
-- ZIP code tabulation areas
-
-### Urban Institute Education Data API
-- Education statistics and school information
-- Endpoints: schools directory and enrollment data
-- No API key required
-
-### Geographic Data (TIGER/Line)
-- US Census Bureau shapefiles (2023)
-- Offline processing with GeoPandas
-- County, state, and ZIP code boundaries
-
-## Prerequisites
-
-- Python 3.8+
-- PostgreSQL 12+ with PostGIS
-- 8GB RAM minimum (16GB recommended)
-- 5GB free storage for shapefiles
-
-## Installation
-
-1. Clone the repository
-   ```bash
-   git clone <repository-url>
-   cd 696-Milestone-2
-   ```
-
-2. Install Python dependencies
-   ```bash
-   pip install -r requirements.txt
-   pip install -r dbt_project/requirements_dbt.txt
-   ```
-
-3. Configure the application
-   - Copy `.env.example` to `.env` with your credentials
-   - Edit `config.json` with database settings
-
-4. Install pre-commit hooks (optional)
-   ```bash
-   pip install pre-commit
-   pre-commit install
-   ```
-
-## Usage
-
-### ETL Execution
+## Run
 
 ```bash
-# Run main ETL controller
-python src/main.py
-
-# Run individual components
-python src/urban_data.py
-python src/census_data.py
-python src/location_data.py
+cd convex-vercel
+npm install
+npx convex dev        # terminal 1 — Convex backend, hot reload
+npm run dev           # terminal 2 — Next.js on http://localhost:3000
 ```
 
-### dbt Transformation
+Copy `.env.local.example` to `.env.local` and fill in the values.
+
+Load data (pre-exported NDJSON in `scripts/convex_export/`):
 
 ```bash
-# PowerShell
-.\run_dbt.ps1
-
-# Bash/CMD
-dbt run --profiles-dir dbt_project
-dbt docs generate --profiles-dir dbt_project
+npx convex import --table districts    scripts/convex_export/districts.jsonl
+npx convex import --table county_stats scripts/convex_export/county_stats.jsonl
+npx convex import --table state_stats  scripts/convex_export/state_stats.jsonl
 ```
 
-## Resources
+## Environment variables
 
-- Urban Institute API: https://educationdata.urban.org
-- US Census Bureau: https://www.census.gov/data/developers.html
-- PostgreSQL Documentation: https://www.postgresql.org/docs/
+| Variable | Required | Purpose |
+|---|---|---|
+| `NEXT_PUBLIC_CONVEX_URL` | yes | Convex deployment URL (inlined at build — redeploy after changing) |
+| `BEDROCK_ACCESS_KEY_ID` | yes, for AI | AWS key for Claude in Amazon Bedrock |
+| `BEDROCK_SECRET_ACCESS_KEY` | yes, for AI | AWS secret for Claude in Amazon Bedrock |
+| `BEDROCK_REGION` | no | Default `us-east-1` |
+| `BEDROCK_SESSION_TOKEN` | no | Temporary (STS) credentials only |
+| `BEDROCK_MODEL` | no | Default `anthropic.claude-haiku-4-5` |
+| `LLM_DAILY_BUDGET_USD`, `LLM_SESSION_TOKEN_CAP`, `LLM_MAX_SESSIONS_PER_DAY` | no | AI usage caps |
+| `LLM_INPUT_USD_PER_MTOK`, `LLM_OUTPUT_USD_PER_MTOK` | no | Prices used for the daily budget |
+
+## Deploy
+
+```bash
+npx convex deploy                 # push Convex functions/schema to prod deployment
+vercel --prod                     # production deploy
+vercel env pull .env.local        # sync cloud env vars to local
+```
+
+Vercel dashboard: set **Root Directory** to `convex-vercel`.
+
+Other useful: `npx convex dashboard`, `npx convex logs`, `npx convex codegen`, `vercel ls`, `vercel logs <url>`.

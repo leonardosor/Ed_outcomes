@@ -1,0 +1,166 @@
+@import "tailwindcss";
+
+/* ── Design tokens ─────────────────────────────────────────────
+ * Warm "paper" editorial palette. Light is default; dark applies via
+ * system preference unless the user forced light, or when forced dark. */
+:root {
+  --bg: #f6f2ea;
+  --surface: #fffdf8;
+  --sunken: #eee8dc;
+  --border: #e0d8c8;
+  --border-strong: #c9bfab;
+  --text: #1c1a17;
+  --muted: #6c6559;
+  --accent: #4b2fc4;
+  --accent-ink: #ffffff;
+  --row-hover: #f1ebdf;
+  --positive: #1d7a4c;
+  --negative: #b4361c;
+  --dot: #5b21b6;
+  --trend: #c2410c;
+  --map-line: #fffdf8;
+  --no-data: #d9d2c4;
+  --shadow: 0 1px 2px rgb(60 45 20 / 0.06), 0 8px 24px -12px rgb(60 45 20 / 0.18);
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #12110f;
+    --surface: #1a1916;
+    --sunken: #22201c;
+    --border: #2f2c27;
+    --border-strong: #45413a;
+    --text: #ede8de;
+    --muted: #a39c8f;
+    --accent: #9d8cff;
+    --accent-ink: #12110f;
+    --row-hover: #23211d;
+    --positive: #4fc58b;
+    --negative: #f0805f;
+    --dot: #b39dff;
+    --trend: #fb923c;
+    --map-line: #12110f;
+    --no-data: #3a3731;
+    --shadow: 0 1px 2px rgb(0 0 0 / 0.4), 0 8px 24px -12px rgb(0 0 0 / 0.6);
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme="dark"] {
+  --bg: #12110f;
+  --surface: #1a1916;
+  --sunken: #22201c;
+  --border: #2f2c27;
+  --border-strong: #45413a;
+  --text: #ede8de;
+  --muted: #a39c8f;
+  --accent: #9d8cff;
+  --accent-ink: #12110f;
+  --row-hover: #23211d;
+  --positive: #4fc58b;
+  --negative: #f0805f;
+  --dot: #b39dff;
+  --trend: #fb923c;
+  --map-line: #12110f;
+  --no-data: #3a3731;
+  --shadow: 0 1px 2px rgb(0 0 0 / 0.4), 0 8px 24px -12px rgb(0 0 0 / 0.6);
+  color-scheme: dark;
+}
+
+/* Token → Tailwind utility mapping (bg-surface, text-muted, border-line …) */
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-sunken: var(--sunken);
+  --color-line: var(--border);
+  --color-line-strong: var(--border-strong);
+  --color-ink: var(--text);
+  --color-muted: var(--muted);
+  --color-accent: var(--accent);
+  --color-accent-ink: var(--accent-ink);
+  --color-hover: var(--row-hover);
+  --color-positive: var(--positive);
+  --color-negative: var(--negative);
+
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-serif: var(--font-fraunces), ui-serif, Georgia, serif;
+  --font-mono: var(--font-jetbrains), ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+html {
+  font-size: 17px;
+}
+
+body {
+  background-color: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-feature-settings: "ss01", "cv11";
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: color-mix(in srgb, var(--accent) 25%, transparent);
+}
+
+@layer components {
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    box-shadow: var(--shadow);
+  }
+  .kicker {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .floating-tip {
+    pointer-events: none;
+    position: absolute;
+    z-index: 10;
+    max-width: 260px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    box-shadow: var(--shadow);
+    padding: 0.55rem 0.75rem;
+    font-size: 0.82rem;
+    line-height: 1.45;
+  }
+  .skeleton {
+    background: linear-gradient(
+      100deg,
+      var(--sunken) 30%,
+      color-mix(in srgb, var(--sunken) 50%, var(--surface)) 50%,
+      var(--sunken) 70%
+    );
+    background-size: 300% 100%;
+    animation: shimmer 1.6s ease-in-out infinite;
+    border-radius: 14px;
+  }
+}
+
+@keyframes shimmer {
+  from { background-position: 100% 0; }
+  to { background-position: 0 0; }
+}
+
+@keyframes rise {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: none; }
+}
+
+.rise {
+  animation: rise 0.5s ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rise, .skeleton { animation: none; }
+}
+
+/* MapLibre controls blend with theme */
+.maplibregl-canvas:focus { outline: none; }
