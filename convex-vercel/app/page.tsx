@@ -695,41 +695,9 @@ export default function Home() {
 
         {ready && (
           <>
-            {/* ── 02 Other factors ── */}
+            {/* ── 02 AI read ── */}
             <Section
               n="02"
-              kicker="Beyond income"
-              title="What else moves with math scores?"
-              dek="The same lens, pointed at class size, neighbourhood walkability and reading proficiency."
-            >
-              <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
-                {extraMetricPanels.map(({ metric, scatter, pearson, loading }) => (
-                  <div key={metric.key} className="flex flex-col gap-3">
-                    <h3 className="font-serif text-xl">{metric.label}</h3>
-                    <PearsonPanel
-                      pearsonR={pearson?.r ?? null}
-                      label={pearson?.label}
-                      schoolCount={pearson?.count}
-                      noSelection={pearson === null}
-                      loading={loading}
-                      compact
-                    />
-                    <ScatterPlot
-                      data={scatter}
-                      loading={loading}
-                      xLabel={selectedState ? metric.xLabel : `Avg ${metric.xLabel}`}
-                      yLabel={selectedState ? "Math %" : "Avg Math %"}
-                      onPointClick={handleScatterClick}
-                      height={230}
-                    />
-                  </div>
-                ))}
-              </div>
-            </Section>
-
-            {/* ── 03 AI read ── */}
-            <Section
-              n="03"
               kicker="The AI read"
               title={<>What stands out in {insightsContext.label}</>}
               dek="A generated narrative over the figures on screen, plus open-ended questions."
@@ -737,9 +705,9 @@ export default function Home() {
               <InsightsPanel context={insightsContext} ready={insightsReady} />
             </Section>
 
-            {/* ── 04 Income brackets ── */}
+            {/* ── 03 Income brackets ── */}
             <Section
-              n="04"
+              n="03"
               kicker="Distribution"
               title="Proficiency by income bracket"
               dek={
@@ -756,9 +724,9 @@ export default function Home() {
               <IncomeBracketChart data={scatterData} loading={scatterLoading} unitLabel={unitLabel} />
             </Section>
 
-            {/* ── 05 Table ── */}
+            {/* ── 04 Table ── */}
             <Section
-              n="05"
+              n="04"
               kicker="The data"
               title={
                 selectedState && selectedCounty
@@ -868,6 +836,38 @@ export default function Home() {
                     </>
                   )}
                 </table>
+              </div>
+            </Section>
+
+            {/* ── 05 Other factors ── */}
+            <Section
+              n="05"
+              kicker="Beyond income"
+              title="What else moves with math scores?"
+              dek="The same lens, pointed at class size, neighbourhood walkability and reading proficiency."
+            >
+              <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
+                {extraMetricPanels.map(({ metric, scatter, pearson, loading }) => (
+                  <div key={metric.key} className="flex flex-col gap-3">
+                    <h3 className="font-serif text-xl">{metric.label}</h3>
+                    <PearsonPanel
+                      pearsonR={pearson?.r ?? null}
+                      label={pearson?.label}
+                      schoolCount={pearson?.count}
+                      noSelection={pearson === null}
+                      loading={loading}
+                      compact
+                    />
+                    <ScatterPlot
+                      data={scatter}
+                      loading={loading}
+                      xLabel={selectedState ? metric.xLabel : `Avg ${metric.xLabel}`}
+                      yLabel={selectedState ? "Math %" : "Avg Math %"}
+                      onPointClick={handleScatterClick}
+                      height={230}
+                    />
+                  </div>
+                ))}
               </div>
             </Section>
           </>
