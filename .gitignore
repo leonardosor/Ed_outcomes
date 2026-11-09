@@ -46,6 +46,8 @@ db_backup/*.sql
 *.dump
 *.sql
 
+# Keep config tracked
+!config.json
 
 *tiger*
 
@@ -81,17 +83,3 @@ node_modules/
 # Local config with real DB credentials — never commit
 config.json
 **/config.json
-
-# Repo tracks only the Convex + Vercel app. Legacy Streamlit/Postgres/Neon
-# stack, Neon ETL scripts, analytics assets and local tooling stay local.
-postgres-streamlit/
-convex-vercel/src/
-convex-vercel/notebooks/
-convex-vercel/supervised/
-convex-vercel/unsupervised/
-convex-vercel/db_backup/
-convex-vercel/explore_golden_table.ipynb
-convex-vercel/scripts/export_to_convex.py
-_bmad/
-_bmad-output/
-claude-launchers/
